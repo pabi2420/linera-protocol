@@ -57,6 +57,14 @@ spec:
           env:
             - name: RUST_LOG
               value: {{ .Values.logLevel }}
+            {{- if .Values.serverTokioThreads }}
+            - name: LINERA_SERVER_TOKIO_THREADS
+              value: "{{ .Values.serverTokioThreads }}"
+            {{- end }}
+            {{- if .Values.serverTokioBlockingThreads }}
+            - name: LINERA_SERVER_TOKIO_BLOCKING_THREADS
+              value: "{{ .Values.serverTokioBlockingThreads }}"
+            {{- end }}
           volumeMounts:
             - name: config
               mountPath: "/config"
