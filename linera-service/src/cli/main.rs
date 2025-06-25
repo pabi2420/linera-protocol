@@ -2126,7 +2126,7 @@ Make sure to use a Linera client compatible with this network.
         ClientCommand::MultiBenchmark {
             processes,
             faucet,
-            ssd_dir,
+            client_state_dir,
             command,
             delay_between_processes,
         } => {
@@ -2139,7 +2139,14 @@ Make sure to use a Linera client compatible with this network.
 
             let clients = (0..*processes)
                 .map(|n| {
-                    let path_provider = PathProvider::new(ssd_dir)?;
+                    let path_provider = if let Some(client_state_dir) = client_state_dir {
+                        let pid = std::process::id();
+                        let subdir = PathBuf::from(client_state_dir).join(pid.to_string());
+                        std::fs::create_dir_all(&subdir)?;
+                        PathProvider::new(&Some(subdir.to_string_lossy().to_string()))?
+                    } else {
+                        PathProvider::new(client_state_dir)?
+                    };
                     Ok(Arc::new(ClientWrapper::new_with_extra_args(
                         path_provider,
                         Network::Grpc,
